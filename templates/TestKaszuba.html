@@ -1,0 +1,25 @@
+  # quiz z wykorzystaniem formularza
+
+    <form method="POST">
+        # iteracja po pytaniach
+        {% for p in pytania %}
+          <p>
+            {{ p.pytanie }}
+            <br>
+            # ustawienie numeru pytania
+            {% set pnr = loop.index0 %}
+            #pętla iteruje po wszystkich odpowiedziach
+            {% for o in p.odpowiedzi %}
+              <label>
+               #wyswietlenie odpowiedzi do wyboru
+                <input type="radio" value="{{ o }}" name="{{ pnr }}">
+                {{ o }}
+              </label>
+              <br>
+            {% endfor %}
+          </p>
+        {% endfor %}
+
+        #wyslanie wypełnionego formularza po kliknieciu przycisku
+        <button type="submit">Sprawdź odpowiedzi</button>
+    </form>
