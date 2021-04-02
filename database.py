@@ -36,10 +36,10 @@ def check_connection():
         print('Nie ma kontaktu z baza')
 
 
-def insert_one_row():
+def insert_one_row(imie, nick):
     # uzupelniania tabeli (jeden wiersz)
     sql = "INSERT INTO users (name, nick) VALUES (%s, %s)"
-    val = ("Jan", "Nowax78")
+    val = (imie, nick)
     mycursor.execute(sql, val)
     mydb.commit()  # ten commit jest wymagany aby dokonac zmian w bazie
     print(mycursor.rowcount, "record inserted.")
@@ -79,9 +79,17 @@ def select_where():
         print(x)
 
 
-def sort_db():
-    sql = "SELECT * FROM users ORDER BY nick"
-    # sql = "SELECT * FROM customers ORDER BY name DESC" #alternative other order
+def sort_db(choice1, choice2):
+    if choice1 == "nick":
+        sql = "SELECT * FROM users ORDER BY nick "
+    elif choice1 == "name":
+        sql = "SELECT * FROM users ORDER BY name "
+    elif choice1 == "id":
+        sql = "SELECT * FROM users ORDER BY id "
+    if choice2 == "asc" or choice2 == "ASC":
+        sql += "ASC" #alternative other order
+    else:
+        sql += "DESC"
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
     for x in myresult:
@@ -100,12 +108,13 @@ def delete_table(table):
     sql += table
     mycursor.execute(sql)
 
-def update_table(new_value, previos_value):
+def update_table(what_to_change, previos_value, new_value):
     #tabele trzeba zmieniac w poleceniu na razie
-    n_v = new_value
-    p_v = previos_value
-    sql = "UPDATE users SET nick =%s WHERE nick = %s"
-    val = (n_v, p_v)
+    if what_to_change == "nick":
+        sql = "UPDATE users SET nick =%s WHERE nick = %s"
+    elif what_to_change == "name":
+        sql = "UPDATE users SET name =%s WHERE name = %s"
+    val = (new_value, previos_value)
     mycursor.execute(sql, val)
     print(mycursor.rowcount, "record(s) updated")
 
@@ -115,8 +124,9 @@ def update_table(new_value, previos_value):
 show_table()
 # select_from_table()
 # select_where()
-sort_db()
+sort_db((input("Jeśli chcesz posotrować po nickach wpisz: 'nick', jeśli po imionach wpisz 'name', jeśli id to 'id' ")), (input("jesli chcesz posortować rosnąca wpisz: 'asc', jeśli malejąco wpisz cokolwiek ")))
 delete_record()
 #delete_table('users')
-update_table('JOHNFIVE', 'JohnNr5')
-sort_db()
+update_table((input("podaj która kolumne chcesz zastąpić, wpisz 'nick' lub 'name'")), (input("podaj którą wartość chcesz zastąpić")), (input("podaj nową wartość: ")))
+#sort_db()
+insert_one_row((input("podaj imie: ")), (input("podaj nick: ")))
