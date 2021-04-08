@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-
+import database
 
 app = Flask(__name__)
+
 
 
 app.config.update(dict(
@@ -40,12 +41,13 @@ USERS =[{
 
 @app.route('/')
 def main():
-    return render_template("main.html")
+    return render_template("stronaPowitalna.html")
 
 
 @app.route('/User/<userId>')
 def user(userId):
-    return f'Użytkownik o numerze id: {userId} to: '
+    wybrany = USERS[(int(userId)-1)]['nazwa']
+    return f'Użytkownik o numerze id: {userId} to: ' + wybrany
 
 
 @app.route('/Dodaj/<zmienna1>+<zmienna2>')
@@ -56,16 +58,25 @@ def dodaj(zmienna1, zmienna2):
 
 @app.route('/WolniKaszubi')
 def WolniKaszubi():
-    return render_template("index.html")
+    return render_template("stronaPowitalna.html")
 
+@app.route('/listaPodstron')
+def ListaPodstron():
+    return render_template("listaPodstron.html")
 
 @app.route('/ONas')
 def ONas():
-    return render_template('index2.html', zm='Nasz serwis jest wolny od wszystkiego, nie ma śledzenia, nie ma leżenia, nie ma niczego.')
+    return render_template('oNas.html', zm='Nasz serwis jest wolny od wszystkiego, nie ma śledzenia, nie ma leżenia, nie ma niczego.')
 
 
-@app.route('/Logowanie')
+@app.route('/Logowanie', methods=['GET', 'POST'])
 def Logowanie():
+    if request.method == 'POST':
+        _name = request.form['inputName']
+        _email = request.form['inputEmail']
+        _password = request.form['inputPassword']
+        print(_name, _email, _password)
+        database.insert_one_row(_name, _email, _password)
     return render_template("logowanie.html")
 
 
@@ -79,22 +90,22 @@ def TestKaszuba():
         for pnr, odp in odpowiedzi.items():
             if odp == DANE[int(pnr)]['odpok']:
                 punkty += 1
-                if punkty==3: ###test
+                if punkty == 3: ###test
                     print('zdałes')
         flash('Liczba poprawnych odpowiedzi, to: {0}'.format(punkty))
         return redirect(url_for('TestKaszuba'))
     return render_template('TestKaszuba.html', pytania=DANE)
 
 
-@app.route('/Wyszukiwarka', methods=['GET','POST'])
+@app.route('/Wyszukiwarka', methods=['GET', 'POST'])
 def Wyszukiwarka():
     if request.method == 'POST':
-        nazwa = request.form
-        for id, nazwa in nazwa.items():
-            znaleziony = USERS[int(id)].nazwa
-        flash('Numer , to: {0}' .format(znaleziony))
+        id = request.form['id']
+        #znaleziony = USERS[(int(id)-1)]['nazwa']
+        znaleziony = database.select_where('3',id)
+        flash('Użytkownik o numerze id: {0}, to {1}' .format(id, znaleziony))
         return redirect(url_for('Wyszukiwarka'))
-    return render_template('wyszukiwarka.html', chossenId=USERS)
+    return render_template('wyszukiwarka.html')
 
 
 if __name__ == '__main__':

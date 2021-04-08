@@ -1,4 +1,5 @@
 import mysql.connector
+import re
 
 # inicjacja połączenia z bazą
 mydb = mysql.connector.connect(host="localhost", user="jakub", passwd="fajerwerki", database="mydatabase")
@@ -8,10 +9,10 @@ print(mydb)
 mycursor = mydb.cursor()
 
 
-def create_table():
+def create_table(table_name):
     # mycursor.execute("CREATE DATABASE mydatabase") #w tym wypadku rzeczy w cudzyslowiu sa kąpilowane
     # mycursor.execute("ALTER TABLE users ADD COLUMN id INT AUTO_INCREMENT PRIMARY KEY")
-    mycursor.execute("CREATE TABLE users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), nick VARCHAR(255))")
+    mycursor.execute("CREATE TABLE {0} (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255), email VARCHAR(255), password VARCHAR(255))" .format(table_name))
     # powyzsze są zakomitowane bo raz wykonane są już zapisane!!, możliwe ze to sie powinno gdzie indziej pisac
 
 
@@ -36,10 +37,11 @@ def check_connection():
         print('Nie ma kontaktu z baza')
 
 
-def insert_one_row(imie, nick):
+def insert_one_row(arg1, arg2, arg3):
     # uzupelniania tabeli (jeden wiersz)
-    sql = "INSERT INTO users (name, nick) VALUES (%s, %s)"
-    val = (imie, nick)
+    #sql = "INSERT INTO users (name, nick) VALUES (%s, %s, )"
+    sql = "INSERT INTO dane (name, email, password) VALUES (%s, %s, %s)"
+    val = (arg1, arg2, arg3)
     mycursor.execute(sql, val)
     mydb.commit()  # ten commit jest wymagany aby dokonac zmian w bazie
     print(mycursor.rowcount, "record inserted.")
@@ -70,13 +72,18 @@ def select_from_table():
         print(x)
 
 
-def select_where():
-    # sql = "SELECT * FROM users WHERE nick ='Andrjuu'"
-    sql = "SELECT * FROM users WHERE nick LIKE '%Szu%'"
+def select_where(choice, search):
+    if choice == '1':
+        sql = ("SELECT * FROM users WHERE nick ='%s'" % search)
+    elif choice == '2':
+        sql = ("SELECT * FROM users WHERE nick LIKE '%{0}%'" .format(search))
+    else:
+        sql = ("SELECT * FROM dane WHERE id LIKE '%{0}%'" .format(search))
     mycursor.execute(sql)
     myresult = mycursor.fetchall()
     for x in myresult:
         print(x)
+    return myresult
 
 
 def sort_db(choice1, choice2):
@@ -118,15 +125,15 @@ def update_table(what_to_change, previos_value, new_value):
     mycursor.execute(sql, val)
     print(mycursor.rowcount, "record(s) updated")
 
-#create_table()
+#create_table(input("Podaj nazwę tabeli która chcesz utworzyć: "))
 #insert_many_rows()
 # show_db()
-show_table()
+#show_table()
 # select_from_table()
-# select_where()
-sort_db((input("Jeśli chcesz posotrować po nickach wpisz: 'nick', jeśli po imionach wpisz 'name', jeśli id to 'id' ")), (input("jesli chcesz posortować rosnąca wpisz: 'asc', jeśli malejąco wpisz cokolwiek ")))
-delete_record()
+#select_where(input("Jeżeli chcesz wyszukać po całym nicku wpisz: 1\nJeżeli po jego części wpisz: 2\n"), input("Wpisz szukaną fraze: "))
+#sort_db((input("Jeśli chcesz posotrować po nickach wpisz: 'nick', jeśli po imionach wpisz 'name', jeśli id to 'id' ")), (input("jesli chcesz posortować rosnąca wpisz: 'asc', jeśli malejąco wpisz cokolwiek ")))
+#delete_record()
 #delete_table('users')
-update_table((input("podaj która kolumne chcesz zastąpić, wpisz 'nick' lub 'name'")), (input("podaj którą wartość chcesz zastąpić")), (input("podaj nową wartość: ")))
+#update_table((input("podaj która kolumne chcesz zastąpić, wpisz 'nick' lub 'name'")), (input("podaj którą wartość chcesz zastąpić")), (input("podaj nową wartość: ")))
 #sort_db()
-insert_one_row((input("podaj imie: ")), (input("podaj nick: ")))
+#insert_one_row(input("podaj nazwę tabeli, którą chcesz uzupełnić: "), (input("podaj imie: ")), (input("podaj email: "), input("Podaj haslo")))
